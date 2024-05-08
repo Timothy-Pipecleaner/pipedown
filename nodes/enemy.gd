@@ -4,6 +4,7 @@ class_name Enemy
 
 @export_category("Patrol") 
 @export var patrol_points: Array[PatrolPoint]
+@export var patrol_loop: bool = false
 @export var patrol_speed: float
 @export var patrol_pause_time: float = 1.0
 @onready var initial_position: Vector2 = position
@@ -17,8 +18,9 @@ func patrol() -> Vector2:
 	if position.distance_to(patrol_point) > 10.0: 
 		return position.direction_to(patrol_point) * patrol_speed
 	else:
+		if patrol_points[patrol_index].pause:
+			patrol_pause()
 		patrol_index = get_next_index()
-		patrol_pause()
 	return Vector2.ZERO
 
 func patrol_pause() -> void:
@@ -43,7 +45,10 @@ func get_next_index() -> int:
 			return patrol_index - 1
 	else:
 		if patrol_index + 1 >= len(patrol_points):
-			patrol_reverse = true
-			return patrol_index - 1
+			if !patrol_loop:
+				patrol_reverse = true
+				return patrol_index - 1
+			else:
+				return 0
 		else:
 			return patrol_index + 1

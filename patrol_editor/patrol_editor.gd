@@ -9,6 +9,7 @@ var is_dragging = false
 var index: int = -1
 
 const HANDLE_SIZE := 15.0
+const HANDLE_HIGHLIGHT_SIZE := 16.0
 
 func _enter_tree():
 	snap_toggle = CheckButton.new()
@@ -92,12 +93,21 @@ func on_patrol_draw():
 	for i in range(0, len(enemy.patrol_points)):
 		if i == 0: continue
 		enemy.draw_dashed_line(enemy.patrol_points[i].position, enemy.patrol_points[i - 1].position, Color.WHITE, HANDLE_SIZE * (2.0/3.0), 50.0, true)
-		
+	
+	if enemy.patrol_loop and len(enemy.patrol_points) > 2:
+		enemy.draw_dashed_line(enemy.patrol_points[0].position, enemy.patrol_points[-1].position, Color.WHITE, HANDLE_SIZE * (2.0/3.0), 50.0, true)		
+	
 	for point in enemy.patrol_points:
-		if enemy.get_local_mouse_position().distance_to(point.position) < 15.0:
-			enemy.draw_circle(point.position, 16.0, Color.DEEP_SKY_BLUE)
+		if point.pause:
+			if enemy.get_local_mouse_position().distance_to(point.position) < 15.0:
+				enemy.draw_rect(Rect2(point.position + Vector2(-HANDLE_HIGHLIGHT_SIZE, -HANDLE_HIGHLIGHT_SIZE), Vector2(HANDLE_HIGHLIGHT_SIZE * 2, HANDLE_HIGHLIGHT_SIZE * 2)), Color.DEEP_SKY_BLUE)
+			else:
+				enemy.draw_rect(Rect2(point.position + Vector2(-HANDLE_SIZE, -HANDLE_SIZE), Vector2(HANDLE_SIZE * 2, HANDLE_SIZE * 2)), Color.RED)
 		else:
-			enemy.draw_circle(point.position, HANDLE_SIZE, Color.WHITE)
+			if enemy.get_local_mouse_position().distance_to(point.position) < 15.0:
+				enemy.draw_circle(point.position, 16.0, Color.DEEP_SKY_BLUE)
+			else:
+				enemy.draw_circle(point.position, HANDLE_SIZE, Color.GREEN)
 
 func on_snap_toggled(state: bool):
 	snapping = state
