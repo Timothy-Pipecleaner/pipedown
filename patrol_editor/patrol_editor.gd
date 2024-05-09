@@ -146,12 +146,16 @@ func add_patrol_point(point: Vector2, grab_point: bool = false):
 			
 	enemy.patrol_points.append(PatrolPoint.new(point))
 	enemy.queue_redraw()
-	if grab_point:
-		is_dragging = true;
-		self.index = index
 	get_undo_redo().add_do_method(enemy, "queue_redraw")
 	get_undo_redo().add_do_property(enemy, "patrol_points", enemy.patrol_points.duplicate())
 	get_undo_redo().commit_action()
+	if grab_point:
+		is_dragging = true;
+		self.index = index
+		get_undo_redo().create_action("Change Patrol Positions")
+		get_undo_redo().add_undo_method(enemy, "queue_redraw")
+		get_undo_redo().add_undo_property(enemy.patrol_points[index], "position", enemy.patrol_points[index].position)
+	
 
 func add_patrol_point_at(index: int, point: Vector2):
 	get_undo_redo().create_action("Add Patrol Point")
@@ -159,11 +163,15 @@ func add_patrol_point_at(index: int, point: Vector2):
 	get_undo_redo().add_undo_property(enemy, "patrol_points", enemy.patrol_points.duplicate())
 	enemy.patrol_points.insert(index, PatrolPoint.new(point))
 	enemy.queue_redraw()
-	is_dragging = true
-	self.index = index
 	get_undo_redo().add_do_method(enemy, "queue_redraw")
 	get_undo_redo().add_do_property(enemy, "patrol_points", enemy.patrol_points.duplicate())
 	get_undo_redo().commit_action()
+	is_dragging = true
+	self.index = index
+	get_undo_redo().create_action("Change Patrol Positions")
+	get_undo_redo().add_undo_method(enemy, "queue_redraw")
+	get_undo_redo().add_undo_property(enemy.patrol_points[index], "position", enemy.patrol_points[index].position)
+	
 
 func remove_patrol_point_at(index: int):
 	get_undo_redo().create_action("Remove Patrol Point")
