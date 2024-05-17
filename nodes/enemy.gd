@@ -7,20 +7,27 @@ class_name Enemy
 @export var patrol_loop: bool = false
 @export var patrol_speed: float
 @export var patrol_pause_time: float = 1.0
-@onready var initial_position: Vector2 = position
+var initial_position: Vector2
 var patrol_index: int = 0
 var patrol_paused: bool = false
 var patrol_reverse: bool = false
 
+@export var nav_agent: NavigationAgent2D
+
+func _ready():
+	initial_position = global_position
+	nav_agent.target_position = patrol_points[patrol_index].position + initial_position
+	
 func patrol() -> Vector2:
 	if patrol_paused: return Vector2.ZERO
-	var patrol_point = patrol_points[patrol_index].position + initial_position
-	if position.distance_to(patrol_point) > 10.0: 
-		return position.direction_to(patrol_point) * patrol_speed
+	nav_agent.target_position = patrol_points[patrol_index].position + initial_position
+	if !nav_agent.is_navigation_finished(): 
+		return global_position.direction_to(nav_agent.get_next_path_position()) * patrol_speed
 	else:
 		if patrol_points[patrol_index].pause:
 			patrol_pause()
 		patrol_index = get_next_index()
+		nav_agent.target_position = patrol_points[patrol_index].position + initial_position
 	return Vector2.ZERO
 
 func patrol_pause() -> void:
